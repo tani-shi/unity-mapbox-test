@@ -1,8 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using Mapbox.Unity.Map;
 using Mapbox.Utils;
+
+#if UNITY_ANDROID
+using UnityEngine.Android;
+#endif
 
 namespace MapboxTest
 {
@@ -10,27 +15,39 @@ namespace MapboxTest
     {
         [SerializeField] private AbstractMap _map;
         [SerializeField] private Transform _player;
+        [SerializeField] private Text _errorText;
 
         void Start()
         {
-            if (Input.location.isEnabledByUser)
-            {
-                Input.location.Start();
+#if UNITY_ANDROID
+            if (!Permission.HasUserAuthorizedPermission(Permission.FineLocation)) {
+                Permission.RequestUserPermission(Permission.FineLocation);
             }
-            else
-            {
-                Debug.LogError("Failed to start getting location infos, change your settings to enable location services.");
-            }
+#endif
         }
 
         void Update()
         {
-            if (Input.location.status == LocationServiceStatus.Running)
+            if (Input.location.isEnabledByUser)
             {
-                var lastData = Input.location.lastData;
-                var geo = new Vector2d(lastData.latitude, lastData.longitude);
-                _player.position = _map.GeoToWorldPosition(geo, false);
+                switch (Input.location.status)
+                {
+                    case LocationServiceStatus.Stopped:
+                        Input.location.Start();
+                        break;
+
+                    case LocationServiceStatus.Running:
+                        var lastData = Input.location.lastData;
+                        var geo = new Vector2d(lastData.latitude, lastData.longitude);
+                        var pos = _map.GeoToWorldPosition(geo, false);
+                        pos.y = 0;
+                        _player.position = pos;
+                        _map.UpdateMap();
+                        break;
+                }
             }
+
+            _errorText.gameObject.SetActive(!Input.location.isEnabledByUser);
         }
     }
 }
