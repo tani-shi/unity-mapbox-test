@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/MapboxTest/Scenes/LocationServiceTest.unity
-    guid: aca07e5e5852f4794b9d2b22f42032e6
+    path: Assets/MapboxTest/Scenes/DirectionsTest.unity
+    guid: f95add953769e410d8a13ca6a826b678
   m_configObjects: {}
